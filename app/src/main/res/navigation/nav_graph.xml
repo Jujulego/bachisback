@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:id="@+id/nav_graph"
+
+    app:startDestination="@id/fragment_main">
+
+    <!-- Fragments -->
+    <fragment android:id="@+id/fragment_main"
+        android:name="net.capellari.julien.bachisback.MainFragment"
+        android:label="@string/label_main"
+
+        tools:layout="@layout/fragment_main" />
+
+    <!-- Action globales -->
+    <action android:id="@+id/menu_main"
+        app:destination="@id/fragment_main" />
+</navigation>
