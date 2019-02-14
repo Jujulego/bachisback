@@ -27,8 +27,8 @@ class CameraFragment : Fragment() {
     private var camera: CameraDevice? = null
     private var captureSession: CameraCaptureSession? = null
 
-    private lateinit var handler: Handler
-    private val backgroundThread = HandlerThread("Camera")
+    private var handler: Handler? = null
+    private var backgroundThread: HandlerThread? = null
 
     private val cameraState = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
@@ -41,17 +41,29 @@ class CameraFragment : Fragment() {
         override fun onDisconnected(camera: CameraDevice) {
             Log.d(TAG, "Camera ${camera.id} disconnected !")
 
-            this@CameraFragment.camera?.close()
-            this@CameraFragment.camera = null
+            closeCamera()
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
-            Log.d(TAG, "Camera ${camera.id} error $error !")
+            val err = when(error) {
+                ERROR_CAMERA_IN_USE -> "Camera in use"
+                ERROR_MAX_CAMERAS_IN_USE -> "Max camera in use"
+                ERROR_CAMERA_DISABLED -> "Camera disabled"
+                ERROR_CAMERA_DEVICE -> "Camera device"
+                ERROR_CAMERA_SERVICE -> "Camera service"
+                else -> "Unknown error $error"
+            }
+
+            Log.d(TAG, "Camera ${camera.id} error: $err !")
+
+            closeCamera()
         }
     }
     private val textureListener = object : TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
-            openCamera()
+            if (backgroundThread != null) {
+                openCamera()
+            }
         }
 
         override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {}
@@ -72,19 +84,23 @@ class CameraFragment : Fragment() {
     }
 
     // Events
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        backgroundThread.start()
-        handler = Handler(backgroundThread.looper)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         texture_view.surfaceTextureListener = textureListener
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Start preview
+        startBackgroundThread()
+
+        if (texture_view.isAvailable) {
+            openCamera()
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -97,18 +113,48 @@ class CameraFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onPause() {
+        super.onPause()
 
-        camera?.close()
-        camera = null
-
-        backgroundThread.quitSafely()
-        backgroundThread.join()
+        // Stop preview
+        closeCamera()
+        stopBackgroundThread()
     }
 
     // Méthodes
-    fun openCamera() {
+    // - manage thread
+    private fun startBackgroundThread() {
+        // Gardien
+        if (backgroundThread != null) return
+
+        // Start thread !
+        backgroundThread = HandlerThread("Camera").apply {
+            start()
+
+            // get handler
+            handler = Handler(looper)
+        }
+    }
+
+    private fun stopBackgroundThread() {
+        backgroundThread?.let {
+            it.quitSafely()
+
+            try {
+                it.join()
+
+            } catch (err: InterruptedException) {
+                Log.w(TAG, "Interrupted while stopping background thread", err)
+
+            } finally {
+                handler = null
+                backgroundThread = null
+            }
+        }
+    }
+
+    // - manage camera
+    private fun openCamera() {
         // Get a back camera id
         val id = cameraManager.cameraIdList.find {
             cameraManager.getCameraCharacteristics(it)
@@ -129,8 +175,9 @@ class CameraFragment : Fragment() {
         }
     }
 
-    fun setupPreview() {
+    private fun setupPreview() {
         camera?.apply {
+            // Setup texture
             val texture = texture_view.surfaceTexture
             texture.setDefaultBufferSize(imageSize!!.width, imageSize!!.height)
 
@@ -145,12 +192,16 @@ class CameraFragment : Fragment() {
                     camera?.apply {
                         captureSession = session
 
-                        //previewRqBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                        //previewRqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH)
+                        previewRqBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+                        previewRqBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                        previewRqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH)
                         //previewRqBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, Size(1080, 1920))
 
-                        val previewRq = previewRqBuilder.build()
-                        session.setRepeatingRequest(previewRq, null, handler)
+                        try {
+                            session.setRepeatingRequest(previewRqBuilder.build(), null, handler)
+                        } catch (err: CameraAccessException) {
+                            Log.w(TAG, "Unable to access camera", err)
+                        }
                     }
                 }
 
@@ -159,5 +210,12 @@ class CameraFragment : Fragment() {
                 }
             }, handler)
         }
+    }
+
+    private fun closeCamera() {
+        camera?.close()
+
+        camera = null
+        captureSession = null
     }
 }
