@@ -5,16 +5,16 @@
 
     android:id="@+id/nav_graph"
 
-    app:startDestination="@id/fragment_main">
+    app:startDestination="@id/fragment_camera">
 
     <!-- Fragments -->
-    <fragment android:id="@+id/fragment_main"
-        android:name="net.capellari.julien.bachisback.MainFragment"
-        android:label="@string/label_main"
+    <fragment android:id="@+id/fragment_camera"
+        android:name="net.capellari.julien.bachisback.CameraFragment"
+        android:label="@string/label_camera"
 
-        tools:layout="@layout/fragment_main" />
+        tools:layout="@layout/fragment_camera" />
 
     <!-- Action globales -->
-    <action android:id="@+id/menu_main"
-        app:destination="@id/fragment_main" />
+    <action android:id="@+id/menu_camera"
+        app:destination="@id/fragment_camera" />
 </navigation>

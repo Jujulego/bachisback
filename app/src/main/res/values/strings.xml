@@ -4,5 +4,6 @@
     <!-- Drawer & Menus -->
     <string name="nav_open">Ouvrir le drawer</string>
     <string name="nav_close">Fermer le drawer</string>
-    <string name="label_main">Main</string>
+
+    <string name="label_camera">Camera</string>
 </resources>
