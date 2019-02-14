@@ -176,39 +176,51 @@ class CameraFragment : Fragment() {
     }
 
     private fun setupPreview() {
-        camera?.apply {
-            // Setup texture
-            val texture = texture_view.surfaceTexture
-            texture.setDefaultBufferSize(imageSize!!.width, imageSize!!.height)
+        try {
+            camera?.apply {
+                // Setup texture
+                val texture = texture_view.surfaceTexture
+                texture.setDefaultBufferSize(imageSize!!.width, imageSize!!.height)
 
-            val surface = Surface(texture)
+                val surface = Surface(texture)
 
-            // Setup preview
-            val previewRqBuilder = createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-            previewRqBuilder.addTarget(surface)
+                // Setup preview
+                val previewRqBuilder = createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+                previewRqBuilder.addTarget(surface)
 
-            createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
-                override fun onConfigured(session: CameraCaptureSession) {
-                    camera?.apply {
-                        captureSession = session
-
-                        previewRqBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
-                        previewRqBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                        previewRqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH)
-                        //previewRqBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, Size(1080, 1920))
-
-                        try {
-                            session.setRepeatingRequest(previewRqBuilder.build(), null, handler)
-                        } catch (err: CameraAccessException) {
-                            Log.w(TAG, "Unable to access camera", err)
-                        }
+                createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
+                    override fun onConfigured(session: CameraCaptureSession) {
+                        updatePreview(previewRqBuilder, session)
                     }
-                }
 
-                override fun onConfigureFailed(session: CameraCaptureSession) {
-                    Log.e(TAG, "Preview failed !")
-                }
-            }, handler)
+                    override fun onConfigureFailed(session: CameraCaptureSession) {
+                        Log.e(TAG, "Preview failed !")
+                    }
+                }, handler)
+            }
+        } catch (err: CameraAccessException) {
+            Log.w(TAG, "Unable to access camera", err)
+
+            if (err.reason == CameraAccessException.CAMERA_DISCONNECTED) {
+                openCamera()
+            }
+        }
+    }
+
+    private fun updatePreview(previewRqBuilder: CaptureRequest.Builder, session: CameraCaptureSession) {
+        camera?.apply {
+            captureSession = session
+
+            previewRqBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+            previewRqBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+            previewRqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH)
+            //previewRqBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, Size(1080, 1920))
+
+            try {
+                session.setRepeatingRequest(previewRqBuilder.build(), null, handler)
+            } catch (err: CameraAccessException) {
+                Log.w(TAG, "Unable to access camera", err)
+            }
         }
     }
 
