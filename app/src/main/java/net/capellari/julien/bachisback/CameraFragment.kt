@@ -3,26 +3,41 @@ package net.capellari.julien.bachisback
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.media.ImageReader
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
+import android.util.SparseIntArray
 import android.view.*
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_camera.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 
 class CameraFragment : Fragment() {
     // Companion
     companion object {
         const val TAG = "CameraFragment"
-
         const val RQ_CAMERA = 1
+
+        val ORIENTATIONS = SparseIntArray().apply {
+            append(Surface.ROTATION_0,    90)
+            append(Surface.ROTATION_90,    0)
+            append(Surface.ROTATION_180, 270)
+            append(Surface.ROTATION_270, 180)
+        }
     }
 
     // Attributs
@@ -104,6 +119,7 @@ class CameraFragment : Fragment() {
 
         // Main handler
         mainHandler = Handler()
+        Log.e(TAG, requireContext().filesDir.absolutePath)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -114,6 +130,7 @@ class CameraFragment : Fragment() {
         initialConstraints.clone(view as ConstraintLayout)
 
         texture_view.surfaceTextureListener = textureListener
+        btn_photo.setOnClickListener { takePicture() }
     }
 
     override fun onResume() {
@@ -253,6 +270,67 @@ class CameraFragment : Fragment() {
             } catch (err: CameraAccessException) {
                 Log.w(TAG, "Unable to access camera", err)
             }
+        }
+    }
+
+    private fun takePicture() {
+        try {
+            camera?.run {
+                // Get size
+                var size = Size(640, 480)
+
+                val characteristics = cameraManager.getCameraCharacteristics(id)
+                val sizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)?.getOutputSizes(ImageFormat.JPEG)
+
+                sizes?.let {
+                    if (it.isNotEmpty()) size = it[0]
+                }
+
+                // Prepare capture request
+                val reader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 1)
+
+                val captureBuilder = createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+                captureBuilder.addTarget(reader.surface)
+                captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+                captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(requireActivity().windowManager.defaultDisplay.rotation))
+
+                // Fichier
+                val file = File(requireContext().filesDir, "pic.jpg")
+                reader.setOnImageAvailableListener({
+                    try {
+                        reader.acquireLatestImage().use { image ->
+                            val buffer = image.planes[0].buffer
+
+                            val bytes = ByteArray(buffer.capacity())
+                            buffer.get(bytes)
+
+                            FileOutputStream(file).use { it.write(bytes) }
+                        }
+                    } catch (err: FileNotFoundException) {
+                        Log.e(TAG, "Erreur à l'enregistrement de la photo", err)
+                    } catch (err: IOException) {
+                        Log.e(TAG, "Erreur à l'enregistrement de la photo", err)
+                    }
+                }, handler)
+
+                // Start capture session
+                createCaptureSession(listOf(reader.surface, Surface(texture_view.surfaceTexture)), object : CameraCaptureSession.StateCallback() {
+                    override fun onConfigured(session: CameraCaptureSession) {
+                        session.capture(captureBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
+                            override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+                                super.onCaptureCompleted(session, request, result)
+
+                                Toast.makeText(requireContext(), "Saved: $file", Toast.LENGTH_SHORT).show()
+                                setupPreview()
+                            }
+                        }, handler)
+                    }
+
+                    override fun onConfigureFailed(session: CameraCaptureSession) {}
+                }, handler)
+            }
+        } catch (err: CameraAccessException) {
+            Log.w(TAG, "Unable to access camera", err)
         }
     }
 
