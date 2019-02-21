@@ -11,6 +11,8 @@ import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
 import android.view.*
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_camera.*
@@ -28,6 +30,7 @@ class CameraFragment : Fragment() {
     private var captureSession: CameraCaptureSession? = null
 
     private var handler: Handler? = null
+    private lateinit var mainHandler: Handler
     private var backgroundThread: HandlerThread? = null
 
     private val cameraState = object : CameraDevice.StateCallback() {
@@ -72,23 +75,44 @@ class CameraFragment : Fragment() {
     }
 
     // Propriétés
+    private val constraintLayout get() = view as? ConstraintLayout
+    private val initialConstraints = ConstraintSet()
+
     private val cameraManager: CameraManager by lazy {
         requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
 
-    private val imageSize: Size? get() = camera?.run {
-        val char = cameraManager.getCameraCharacteristics(id)
-        val map = char.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+    private val imageSize: Size? get() {
+        val sizes = camera?.run {
+            val char = cameraManager.getCameraCharacteristics(id)
+            val map = char.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
-        map?.getOutputSizes(SurfaceTexture::class.java)?.get(0)
+            map?.getOutputSizes(SurfaceTexture::class.java)
+        }
+
+        // Search for 16:9
+        sizes?.forEach {
+            if (it.height * requireContext().resources.getInteger(R.integer.ratio_width) == it.width * requireContext().resources.getInteger(R.integer.ratio_height)) return it
+        }
+
+        return sizes?.get(0)
     }
 
     // Events
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Main handler
+        mainHandler = Handler()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initialConstraints.clone(view as ConstraintLayout)
+
         texture_view.surfaceTextureListener = textureListener
     }
 
@@ -122,6 +146,13 @@ class CameraFragment : Fragment() {
     }
 
     // Méthodes
+    private fun setRatioConstraint() {
+        val constraints = ConstraintSet()
+        constraints.clone(initialConstraints)
+        constraints.setDimensionRatio(R.id.texture_view, "${imageSize!!.height}:${imageSize!!.width}")
+        constraintLayout?.let { constraints.applyTo(it) }
+    }
+
     // - manage thread
     private fun startBackgroundThread() {
         // Gardien
@@ -184,6 +215,8 @@ class CameraFragment : Fragment() {
 
                 val surface = Surface(texture)
 
+                mainHandler.post(this@CameraFragment::setRatioConstraint)
+
                 // Setup preview
                 val previewRqBuilder = createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
                 previewRqBuilder.addTarget(surface)
@@ -214,7 +247,6 @@ class CameraFragment : Fragment() {
             previewRqBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
             previewRqBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
             previewRqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH)
-            //previewRqBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, Size(1080, 1920))
 
             try {
                 session.setRepeatingRequest(previewRqBuilder.build(), null, handler)
