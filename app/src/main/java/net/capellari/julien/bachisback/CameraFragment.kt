@@ -8,7 +8,6 @@ import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.ImageReader
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
@@ -321,7 +320,7 @@ class CameraFragment : Fragment() {
                                 super.onCaptureCompleted(session, request, result)
 
                                 Toast.makeText(requireContext(), "Saved: $file", Toast.LENGTH_SHORT).show()
-                                setupPreview()
+                                //setupPreview()
                             }
                         }, handler)
                     }
