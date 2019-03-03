@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         // Toolbar
         appBarConfig = AppBarConfiguration.Builder(
                     // Top level destinations
-                    R.id.fragment_main
+                    R.id.fragment_partitions
                 ).setDrawerLayout(drawer_layout).build()
 
         setupActionBarWithNavController(navController, appBarConfig!!)
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             // Gestion du drawer
             when (destination.id) {
-                R.id.fragment_main -> navigation_view.setCheckedItem(R.id.menu_main)
+                R.id.fragment_partitions -> navigation_view.setCheckedItem(R.id.menu_partitions)
             }
 
             // On cache le drawer si on est pas au top level

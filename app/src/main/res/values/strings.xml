@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">BachIsBack</string>
+    <string name="database">database.db</string>
 
     <!-- Drawer & Menus -->
     <string name="nav_open">Ouvrir le drawer</string>
     <string name="nav_close">Fermer le drawer</string>
 
     <string name="label_camera">Camera</string>
-    <string name="label_main">Main</string>
+    <string name="label_partitions">Partitions</string>
 </resources>
