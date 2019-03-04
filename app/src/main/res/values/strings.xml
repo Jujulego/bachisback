@@ -8,4 +8,8 @@
 
     <string name="label_camera">Camera</string>
     <string name="label_partitions">Partitions</string>
+    <string name="label_ajout_partition">Nouvelle partition</string>
+
+    <!-- AjoutPartitionDialog -->
+    <string name="ajout_partition_hint">Nom</string>
 </resources>

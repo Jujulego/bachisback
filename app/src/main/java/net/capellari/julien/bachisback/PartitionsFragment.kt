@@ -12,9 +12,9 @@ import kotlinx.android.synthetic.main.fragment_pistes.view.*
 import kotlinx.android.synthetic.main.item_partition.view.*
 import net.capellari.julien.bachisback.db.Partition
 
-class PatitionsFragment: Fragment() {
+class PartitionsFragment: Fragment() {
     // Attributs
-    lateinit var model: PatitionsModel
+    lateinit var model: PartitionsModel
     var adapter = PartitionsAdapter()
 
     // Events
@@ -22,7 +22,7 @@ class PatitionsFragment: Fragment() {
         super.onAttach(context)
 
         // Recup Model
-        model = ViewModelProviders.of(requireActivity())[PatitionsModel::class.java]
+        model = ViewModelProviders.of(requireActivity())[PartitionsModel::class.java]
         model.getPartitions().observe(this, Observer<Array<Partition>> { partitions -> adapter.partitions = partitions })
     }
 
@@ -46,6 +46,13 @@ class PatitionsFragment: Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.toolbar_partitions, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.action_ajout_partition -> { AjoutPartitionDialog().show(childFragmentManager, "dialog"); true }
+            else -> false
+        }
     }
 
     // Classes

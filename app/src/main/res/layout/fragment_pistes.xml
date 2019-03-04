@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
-    tools:context=".PatitionsFragment"
+    tools:context=".PartitionsFragment"
     tools:menu="toolbar_partitions">
 
     <androidx.recyclerview.widget.RecyclerView

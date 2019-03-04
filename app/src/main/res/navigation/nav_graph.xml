@@ -9,7 +9,7 @@
 
     <!-- Fragments -->
     <fragment android:id="@+id/fragment_partitions"
-        android:name="net.capellari.julien.bachisback.PatitionsFragment"
+        android:name="net.capellari.julien.bachisback.PartitionsFragment"
         android:label="@string/label_partitions"
 
         tools:layout="@layout/fragment_pistes">
