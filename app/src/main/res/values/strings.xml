@@ -8,7 +8,12 @@
 
     <string name="label_camera">Camera</string>
     <string name="label_partitions">Partitions</string>
+    <string name="label_partitions_corbeille">Corbeille</string>
+
     <string name="label_ajout_partition">Nouvelle partition</string>
+
+    <!-- PartitionsFragment -->
+    <string name="partition_deleted" formatted="true">Partition %s supprimée</string>
 
     <!-- AjoutPartitionDialog -->
     <string name="ajout_partition_hint">Nom</string>

@@ -18,6 +18,9 @@ data class Partition(
         @Query("select * from Partition where not deleted")
         fun allPartitions(): LiveData<Array<Partition>>
 
+        @Query("select * from Partition where deleted")
+        fun allDeletedPartitions(): LiveData<Array<Partition>>
+
         @Update
         fun updatePartition(vararg partitions: Partition)
 

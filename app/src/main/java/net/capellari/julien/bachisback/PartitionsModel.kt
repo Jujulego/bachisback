@@ -2,6 +2,7 @@ package net.capellari.julien.bachisback
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import net.capellari.julien.bachisback.db.AppDatabase
 import net.capellari.julien.bachisback.db.Partition
 import org.jetbrains.anko.doAsync
@@ -18,7 +19,15 @@ class PartitionsModel(application: Application): AndroidViewModel(application) {
             partitionDao.insertPartition(partition)
         }
     }
-    fun getPartitions() = partitionDao.allPartitions()
+
+    fun getPartitions(fromTrash: Boolean = false): LiveData<Array<Partition>> {
+        return if (fromTrash) {
+            partitionDao.allDeletedPartitions()
+        } else {
+            partitionDao.allPartitions()
+        }
+    }
+
     fun updatePartition(vararg partitions: Partition) {
         doAsync {
             partitionDao.updatePartition(*partitions)

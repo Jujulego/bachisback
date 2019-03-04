@@ -26,10 +26,6 @@ class MainActivity : AppCompatActivity() {
 
         // Layout !
         setContentView(R.layout.activity_main)
-
-        // Configs
-        setupToolbar()
-        setupDrawer()
         setupNavigation()
     }
 
@@ -60,44 +56,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Méthodes
-    private fun setupToolbar() {
-        // Association de la toolbar du layout
-        setSupportActionBar(toolbar)
+    private fun setupNavigation() {
+        // Configuration
+        appBarConfig = AppBarConfiguration.Builder(navigation_view.menu)
+                .setDrawerLayout(drawer_layout)
+                .build()
 
-        // Options
+        // Toolbar
+        setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setHomeButtonEnabled(true)
         }
-    }
-
-    private fun setupDrawer() {
-        // ActionBarToggle (bouton en haut à gauche avec animation)
-        drawerToggle = ActionBarDrawerToggle(
-            this, drawer_layout,
-            R.string.nav_open, R.string.nav_close
-        )
-
-        drawer_layout.addDrawerListener(drawerToggle!!)
-    }
-
-    private fun setupNavigation() {
-        // Toolbar
-        appBarConfig = AppBarConfiguration.Builder(
-                    // Top level destinations
-                    R.id.fragment_partitions
-                ).setDrawerLayout(drawer_layout).build()
 
         setupActionBarWithNavController(navController, appBarConfig!!)
+
+        // Drawer
+        drawerToggle = ActionBarDrawerToggle(this, drawer_layout, R.string.nav_open, R.string.nav_close)
+        drawer_layout.addDrawerListener(drawerToggle!!)
+
         navigation_view.setupWithNavController(navController)
 
         // Navigation Events
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            // Gestion du drawer
-            when (destination.id) {
-                R.id.fragment_partitions -> navigation_view.setCheckedItem(R.id.menu_partitions)
-            }
-
             // On cache le drawer si on est pas au top level
             if (isTopLevelDestination(destination.id)) {
                 drawerToggle?.syncState()
