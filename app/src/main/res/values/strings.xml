@@ -6,9 +6,13 @@
     <string name="nav_open">Ouvrir le drawer</string>
     <string name="nav_close">Fermer le drawer</string>
 
+    <string name="delete">Supprimer</string>
+    <string name="restore">Restorer</string>
+    <string name="clear">Vider</string>
+
     <string name="label_camera">Camera</string>
     <string name="label_partitions">Partitions</string>
-    <string name="label_partitions_corbeille">Corbeille</string>
+    <string name="label_corbeille">Corbeille</string>
 
     <string name="label_ajout_partition">Nouvelle partition</string>
 

@@ -4,13 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_partitions.view.*
-import net.capellari.julien.bachisback.db.Partition
 
 class PartitionsFragment: Fragment() {
     // Attributs
@@ -25,6 +23,15 @@ class PartitionsFragment: Fragment() {
         model = ViewModelProviders.of(requireActivity())[PartitionsModel::class.java]
 
         adapter = PartitionsAdapter(model)
+        adapter.listener = object : PartitionHolder.PartitionListener {
+            override fun onMenuItemSelected(holder: PartitionHolder, item: MenuItem): Boolean {
+                return when(item.itemId) {
+                    R.id.delete -> { holder.toTrash(); true }
+                    else -> false
+                }
+            }
+        }
+
         model.getPartitions().observe(this, adapter.observer)
     }
 

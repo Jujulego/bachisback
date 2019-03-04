@@ -19,16 +19,15 @@
             app:destination="@id/fragment_camera" />
     </fragment>
 
+    <fragment android:id="@+id/fragment_corbeille"
+        android:name="net.capellari.julien.bachisback.CorbeilleFragment"
+        android:label="@string/label_corbeille"
+
+        tools:layout="@layout/fragment_partitions" />
+
     <fragment android:id="@+id/fragment_camera"
         android:name="net.capellari.julien.bachisback.CameraFragment"
         android:label="@string/label_camera"
 
         tools:layout="@layout/fragment_camera" />
-    <fragment
-        android:id="@+id/fragment_corbeille"
-        android:name="net.capellari.julien.bachisback.CorbeilleFragment"
-        android:label="CorbeilleFragment" />
-
-    <!-- Action globales -->
-
 </navigation>

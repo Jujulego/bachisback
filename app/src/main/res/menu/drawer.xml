@@ -7,6 +7,6 @@
 
         <item android:id="@+id/fragment_corbeille"
             android:icon="@drawable/ic_trash"
-            android:title="@string/label_partitions_corbeille" />
+            android:title="@string/label_corbeille" />
     </group>
 </menu>

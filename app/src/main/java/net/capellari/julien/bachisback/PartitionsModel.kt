@@ -33,4 +33,10 @@ class PartitionsModel(application: Application): AndroidViewModel(application) {
             partitionDao.updatePartition(*partitions)
         }
     }
+
+    fun deletePartition(vararg partitions: Partition) {
+        doAsync {
+            partitionDao.deletePartition(*partitions)
+        }
+    }
 }

@@ -22,12 +22,24 @@ class CorbeilleFragment: Fragment() {
         // Recup Model
         model = ViewModelProviders.of(requireActivity())[PartitionsModel::class.java]
 
-        adapter = PartitionsAdapter(model)
+        adapter = PartitionsAdapter(model, R.menu.menu_partition_corbeille)
+        adapter.listener = object : PartitionHolder.PartitionListener {
+            override fun onMenuItemSelected(holder: PartitionHolder, item: MenuItem): Boolean {
+                return when(item.itemId) {
+                    R.id.delete  -> { holder.delete();  true }
+                    R.id.restore -> { holder.restore(); true }
+                    else -> false
+                }
+            }
+        }
+
         model.getPartitions(true).observe(this, adapter.observer)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -42,6 +54,13 @@ class CorbeilleFragment: Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.toolbar_partitions, menu)
+        inflater.inflate(R.menu.toolbar_corbeille, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.delete_all -> { model.deletePartition(*adapter.partitions); true }
+            else -> false
+        }
     }
 }
