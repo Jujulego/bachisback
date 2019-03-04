@@ -6,6 +6,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_pistes.view.*
@@ -41,6 +42,9 @@ class PartitionsFragment: Fragment() {
         view.partitions.let {
             it.adapter = adapter
             it.layoutManager = LinearLayoutManager(requireContext())
+
+            val helper = ItemTouchHelper(PartitionsTouchCallback())
+            helper.attachToRecyclerView(it)
         }
     }
 
@@ -56,7 +60,7 @@ class PartitionsFragment: Fragment() {
     }
 
     // Classes
-    class PartitionsAdapter : RecyclerView.Adapter<PartitionHolder>() {
+    inner class PartitionsAdapter : RecyclerView.Adapter<PartitionHolder>() {
         // Attributs
         var partitions: Array<Partition> = arrayOf()
             set(value) {
@@ -76,7 +80,7 @@ class PartitionsFragment: Fragment() {
         }
     }
 
-    class PartitionHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class PartitionHolder(val view: View) : RecyclerView.ViewHolder(view) {
         // Attributs
         var partition: Partition? = null
 
@@ -86,6 +90,25 @@ class PartitionsFragment: Fragment() {
 
             // Affichage
             view.nom.text = partition.nom
+        }
+
+        fun toTrash() {
+            partition?.let {
+                it.deleted = true
+                model.updatePartition(it)
+            }
+        }
+    }
+
+    inner class PartitionsTouchCallback : ItemTouchHelper.Callback() {
+        override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder)
+                = makeMovementFlags(0, ItemTouchHelper.END)
+
+        override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder)
+                = false
+
+        override fun onSwiped(holder: RecyclerView.ViewHolder, direction: Int) {
+            if (holder is PartitionHolder) holder.toTrash()
         }
     }
 }

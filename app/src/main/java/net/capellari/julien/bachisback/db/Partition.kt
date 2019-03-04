@@ -6,7 +6,8 @@ import androidx.room.*
 @Entity
 data class Partition(
     @PrimaryKey(autoGenerate = true) var id: Int,
-    var nom: String
+    var nom: String,
+    var deleted: Boolean = false
 ) {
     // Dao
     @Dao
@@ -14,7 +15,7 @@ data class Partition(
         @Insert
         fun insertPartition(vararg partitions: Partition)
 
-        @Query("select * from Partition")
+        @Query("select * from Partition where not deleted")
         fun allPartitions(): LiveData<Array<Partition>>
 
         @Update

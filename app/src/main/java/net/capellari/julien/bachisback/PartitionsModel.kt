@@ -9,7 +9,7 @@ import org.jetbrains.anko.doAsync
 class PartitionsModel(application: Application): AndroidViewModel(application) {
     // Propriétés
     private val database: AppDatabase by lazy { AppDatabase.database(application) }
-    private val partitionDao: Partition.PartitionDao by lazy { database.pisteDao() }
+    private val partitionDao: Partition.PartitionDao by lazy { database.partitionDao() }
 
     // Méthodes
     fun addPartition(nom: String) {
@@ -19,4 +19,9 @@ class PartitionsModel(application: Application): AndroidViewModel(application) {
         }
     }
     fun getPartitions() = partitionDao.allPartitions()
+    fun updatePartition(vararg partitions: Partition) {
+        doAsync {
+            partitionDao.updatePartition(*partitions)
+        }
+    }
 }
