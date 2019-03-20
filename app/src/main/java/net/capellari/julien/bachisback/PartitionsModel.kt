@@ -15,15 +15,8 @@ class PartitionsModel(application: Application): AndroidViewModel(application) {
     private val photoDao: Photo.PhotoDao by lazy { database.photoDao() }
 
     // Méthodes
-    fun addPartition(nom: String) {
-        doAsync {
-            val partition = Partition(0, nom)
-            partitionDao.insertPartition(partition)
-        }
-    }
-
+    // - partitions
     fun getPartition(id: Int) = partitionDao.getPartition(id)
-
     fun allPartitions(fromTrash: Boolean = false): LiveData<Array<Partition>> {
         return if (fromTrash) {
             partitionDao.allDeletedPartitions()
@@ -32,16 +25,29 @@ class PartitionsModel(application: Application): AndroidViewModel(application) {
         }
     }
 
+    fun addPartition(nom: String) {
+        doAsync {
+            val partition = Partition(0, nom)
+            partitionDao.insertPartition(partition)
+        }
+    }
     fun updatePartition(vararg partitions: Partition) {
         doAsync {
             partitionDao.updatePartition(*partitions)
         }
     }
-
     fun deletePartition(vararg partitions: Partition) {
         doAsync {
             partitionDao.deletePartition(*partitions)
         }
+    }
+
+    // - photos
+    fun getPhoto(id: Int): LiveData<Photo> {
+        return photoDao.getById(id);
+    }
+    fun allPhotos(partition: Partition): LiveData<Array<Photo>> {
+        return photoDao.allByPartition(partition.id)
     }
 
     fun addPhoto(vararg photos: Photo) {

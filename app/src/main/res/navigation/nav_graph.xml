@@ -32,13 +32,14 @@
         tools:layout="@layout/fragment_partition">
 
         <!-- Arguments -->
-        <argument android:name="partition_id"
-            app:argType="integer" />
+        <argument android:name="partition_id" app:argType="integer" />
 
         <!-- Actions -->
-        <action
-            android:id="@+id/action_partition_to_camera"
+        <action android:id="@+id/action_partition_to_camera"
             app:destination="@id/fragment_camera" />
+
+        <action android:id="@+id/action_fragment_partition_to_fragment_photo"
+            app:destination="@id/fragment_photo" />
     </fragment>
 
     <fragment android:id="@+id/fragment_camera"
@@ -48,7 +49,14 @@
         tools:layout="@layout/fragment_camera">
 
         <!-- Arguments -->
-        <argument android:name="partition_id"
-            app:argType="integer" />
+        <argument android:name="partition_id" app:argType="integer" />
+    </fragment>
+
+    <fragment android:id="@+id/fragment_photo"
+        android:name="net.capellari.julien.bachisback.PhotoFragment"
+        android:label="@string/label_photo" >
+
+        <!-- Arguments -->
+        <argument android:name="photo_id" app:argType="integer" />
     </fragment>
 </navigation>

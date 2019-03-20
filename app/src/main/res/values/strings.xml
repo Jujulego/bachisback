@@ -13,6 +13,8 @@
     <string name="label_camera">Camera</string>
     <string name="label_partitions">Partitions</string>
     <string name="label_corbeille">Corbeille</string>
+    <string name="label_partition">Partition</string>
+    <string name="label_photo">Photo</string>
 
     <string name="label_ajout_partition">Nouvelle partition</string>
 
@@ -21,5 +23,4 @@
 
     <!-- AjoutPartitionDialog -->
     <string name="ajout_partition_hint">Nom</string>
-    <string name="label_partition">Partition</string>
 </resources>
