@@ -19,7 +19,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_camera.*
+import net.capellari.julien.bachisback.db.Partition
+import net.capellari.julien.bachisback.db.Photo
+import net.capellari.julien.bachisback.db.generateFileName
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -40,6 +46,9 @@ class CameraFragment : Fragment() {
     }
 
     // Attributs
+    lateinit var model: PartitionsModel
+    private var partition: Partition? = null
+
     private var camera: CameraDevice? = null
     private var captureSession: CameraCaptureSession? = null
 
@@ -113,6 +122,13 @@ class CameraFragment : Fragment() {
     }
 
     // Events
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+
+        // Recup Model
+        model = ViewModelProviders.of(requireActivity())[PartitionsModel::class.java]
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -130,6 +146,12 @@ class CameraFragment : Fragment() {
 
         texture_view.surfaceTextureListener = textureListener
         btn_photo.setOnClickListener { takePicture() }
+
+        model.getPartition(arguments!!.getInt("partition_id"))
+            .observe(this, Observer<Partition> {
+                partition = it
+                btn_photo.isClickable = true
+            })
     }
 
     override fun onResume() {
@@ -151,6 +173,17 @@ class CameraFragment : Fragment() {
                 }
             }
         }
+    }
+
+    fun onCaptureCompleted(file: File) {
+        Toast.makeText(requireContext(), "Saved !", Toast.LENGTH_SHORT).show()
+        handler?.postDelayed({ setupPreview() }, 2000)
+
+        // Ajout !
+        Log.d(TAG, "${file.name} => ${partition?.id}")
+        model.addPhoto(
+            Photo(0, partition!!.id, file.name)
+        )
     }
 
     override fun onPause() {
@@ -294,7 +327,7 @@ class CameraFragment : Fragment() {
                 captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(requireActivity().windowManager.defaultDisplay.rotation))
 
                 // Fichier
-                val file = File(requireContext().filesDir, "pic.jpg")
+                val file = File(requireContext().filesDir, "${generateFileName(40)}.jpg")
                 reader.setOnImageAvailableListener({
                     try {
                         reader.acquireLatestImage().use { image ->
@@ -319,8 +352,7 @@ class CameraFragment : Fragment() {
                             override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                                 super.onCaptureCompleted(session, request, result)
 
-                                Toast.makeText(requireContext(), "Saved: $file", Toast.LENGTH_SHORT).show()
-                                //setupPreview()
+                                mainHandler.post { this@CameraFragment.onCaptureCompleted(file) }
                             }
                         }, handler)
                     }

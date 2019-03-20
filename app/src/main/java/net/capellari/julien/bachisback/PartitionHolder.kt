@@ -26,6 +26,7 @@ class PartitionHolder(val view: View, val model: PartitionsModel, @MenuRes val m
         menu.setOnMenuItemClickListener(this)
         menu.inflate(menu_id)
 
+        view.setOnClickListener { listener?.onClick(this) }
         view.menu.setOnClickListener { menu.show() }
     }
 
@@ -71,6 +72,7 @@ class PartitionHolder(val view: View, val model: PartitionsModel, @MenuRes val m
 
     // Interface
     interface PartitionListener {
+        fun onClick(holder: PartitionHolder)
         fun onMenuItemSelected(holder: PartitionHolder, item: MenuItem): Boolean
     }
 }

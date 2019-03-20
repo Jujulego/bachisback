@@ -21,4 +21,5 @@
 
     <!-- AjoutPartitionDialog -->
     <string name="ajout_partition_hint">Nom</string>
+    <string name="label_partition">Partition</string>
 </resources>

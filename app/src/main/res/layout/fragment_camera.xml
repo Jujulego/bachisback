@@ -39,6 +39,7 @@
         android:elevation="4dp"
         android:src="@drawable/ic_photo_camera"
         android:tint="@android:color/white"
+        android:clickable="false"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -3,8 +3,10 @@ package net.capellari.julien.bachisback
 import android.content.Context
 import android.os.Bundle
 import android.view.*
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,15 @@ class PartitionsFragment: Fragment() {
 
         adapter = PartitionsAdapter(model)
         adapter.listener = object : PartitionHolder.PartitionListener {
+            override fun onClick(holder: PartitionHolder) {
+                holder.partition?.let {
+                    findNavController().navigate(
+                        R.id.action_partition_selected,
+                        bundleOf("partition_id" to it.id)
+                    )
+                }
+            }
+
             override fun onMenuItemSelected(holder: PartitionHolder, item: MenuItem): Boolean {
                 return when(item.itemId) {
                     R.id.delete -> { holder.toTrash(); true }
@@ -32,7 +43,7 @@ class PartitionsFragment: Fragment() {
             }
         }
 
-        model.getPartitions().observe(this, adapter.observer)
+        model.allPartitions().observe(this, adapter.observer)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

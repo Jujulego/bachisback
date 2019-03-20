@@ -4,11 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_partitions.view.*
-import net.capellari.julien.bachisback.db.Partition
 
 class CorbeilleFragment: Fragment() {
     // Attributs
@@ -24,6 +22,10 @@ class CorbeilleFragment: Fragment() {
 
         adapter = PartitionsAdapter(model, R.menu.menu_partition_corbeille)
         adapter.listener = object : PartitionHolder.PartitionListener {
+            override fun onClick(holder: PartitionHolder) {
+
+            }
+
             override fun onMenuItemSelected(holder: PartitionHolder, item: MenuItem): Boolean {
                 return when(item.itemId) {
                     R.id.delete  -> { holder.delete();  true }
@@ -33,7 +35,7 @@ class CorbeilleFragment: Fragment() {
             }
         }
 
-        model.getPartitions(true).observe(this, adapter.observer)
+        model.allPartitions(true).observe(this, adapter.observer)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -2,6 +2,7 @@ package net.capellari.julien.bachisback
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.annotation.IdRes
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -12,6 +13,11 @@ import androidx.navigation.ui.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    // Companion
+    companion object {
+        const val TAG = "MainActivity"
+    }
+
     // Attributs
     private var drawerToggle: ActionBarDrawerToggle? = null
     private var appBarConfig: AppBarConfiguration? = null
@@ -38,17 +44,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return item.onNavDestinationSelected(navController)
-                || (isAtTopLevel && (drawerToggle?.onOptionsItemSelected(item) ?: false))
-                || super.onOptionsItemSelected(item)
-    }
-
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
 
         // Pass to the drawerToggle
         drawerToggle?.onConfigurationChanged(newConfig)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return item.onNavDestinationSelected(navController)
+                || (isAtTopLevel && (drawerToggle?.onOptionsItemSelected(item) ?: false))
+                || super.onOptionsItemSelected(item)
     }
 
     override fun onSupportNavigateUp(): Boolean {

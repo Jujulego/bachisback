@@ -26,6 +26,10 @@ class PartitionsAdapter(val model: PartitionsModel, @MenuRes val menu_id: Int = 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PartitionHolder {
         return PartitionHolder(parent.inflate(R.layout.item_partition, false), model, menu_id,
             object : PartitionHolder.PartitionListener {
+                override fun onClick(holder: PartitionHolder) {
+                    listener?.onClick(holder)
+                }
+
                 override fun onMenuItemSelected(holder: PartitionHolder, item: MenuItem): Boolean {
                     return listener?.onMenuItemSelected(holder, item) ?: false
                 }

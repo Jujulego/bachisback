@@ -15,6 +15,9 @@ data class Partition(
         @Insert
         fun insertPartition(vararg partitions: Partition)
 
+        @Query("select * from Partition where id=:id")
+        fun getPartition(id: Int): LiveData<Partition>
+
         @Query("select * from Partition where not deleted")
         fun allPartitions(): LiveData<Array<Partition>>
 
